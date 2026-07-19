@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container" style="max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 5px solid #D49B23;">
+    
+    <!-- زر العودة المباشر والمضمون للصفحة الرئيسية باستخدام / -->
+    <a href="/" style="text-decoration: none; color: #666; font-weight: bold; display: inline-block; margin-bottom: 20px;">
+        ← العودة للصفحة الرئيسية
+    </a>
+
+    <!-- عنوان المشروع -->
+    <h1 style="color: var(--text-main); margin-bottom: 15px;">{{ project.title }}</h1>
+    
+    <!-- القسم إن وجد -->
+    {% if project.category %}
+    <span style="background: #EAE3D2; color: #D49B23; padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; display: inline-block; margin-bottom: 25px;">
+        📁 القسم: {{ project.category.name }}
+    </span>
+    {% endif %}
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 25px;">
+
+    <!-- تفاصيل ووصف المشروع الكامل -->
+    <div class="project-description-box" style="line-height: 1.8; color: #444; font-size: 16px; margin-bottom: 30px; text-align: right;">
+        <h3 style="color: #D49B23; margin-bottom: 10px;">📝 وصف المشروع الكامل:</h3>
+        <p>{{ project.description }}</p>
+    </div>
+
+    <!-- روابط المشروع الخارجية إن وجدت -->
+    <div class="project-actions" style="display: flex; gap: 15px; margin-top: 30px;">
+        {% if project.live_link %}
+        <a href="{{ project.live_link }}" target="_blank" class="btn btn-primary" style="text-decoration: none; padding: 10px 20px; border-radius: 6px;">
+            🔗 معاينة حية للمشروع
+        </a>
+        {% endif %}
+        
+        <!-- استبدال رابط جيت هاب برابط جوجل درايف -->
+        {% if project.code_link %}
+        <a href="{{ project.code_link }}" target="_blank" class="btn btn-secondary" style="text-decoration: none; padding: 10px 20px; border-radius: 6px; background: #228B22; color: white; display: inline-flex; align-items: center; gap: 8px;">
+            🤖 تحميل المشروع من Google Drive
+        </a>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

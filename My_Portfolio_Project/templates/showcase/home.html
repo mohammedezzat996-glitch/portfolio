@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- القسم التعريفي للموقع (Hero Section) -->
+<section class="hero-section">
+    <h1>مرحباً بك في معرض مشاريعي الرقمية</h1>
+    <p>مساحتي الخاصة لاستعراض أفضل البرمجيات والحلول الذكية التي قمت بتطويرها وهندستها.</p>
+    <div class="hero-buttons">
+        <a href="{% url 'gallery' %}" class="btn btn-primary">تصفح المعرض الكامل <i class="fa-solid fa-arrow-left"></i></a>
+        <a href="#contact" class="btn btn-secondary">تواصل معي</a>
+    </div>
+</section>
+
+<!-- قسم عرض المشاريع في الصفحة الرئيسية -->
+<section class="featured-section" id="projects">
+    <div class="section-header">
+        <h2>أحدث المشاريع المعروضة</h2>
+        <p>إليك بعض من أفضل أعمالي المضافة حديثاً في المعرض</p>
+    </div>
+    
+    <div class="projects-grid">
+        {% for project in featured_projects %}
+        <div class="project-card">
+            <div class="project-card-body">
+                <h3 style="color:var(--accent-hover); margin-bottom:10px;">{{ project.title }}</h3>
+                <p style="margin-bottom:15px; color:var(--text-main);">{{ project.description }}</p>
+                <a href="{% url 'detail' project.pk %}" class="card-link">استكشف تفاصيل المشروع ←</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align:center; padding: 20px;">
+            <p class="no-data">لا توجد مشاريع منشورة حالياً في الصفحة الرئيسية.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- نموذج التواصل وشات الرسائل المطور -->
+<section class="contact-section" id="contact">
+    <div class="section-header" style="text-align:center; margin-bottom:20px;">
+        <h2>منتدى النقاش وصندوق الرسائل المباشر</h2>
+        <p style="color: var(--text-muted);">تحدث مع المطور والزوار الآخرين بشكل تفاعلي</p>
+    </div>
+
+    <!-- شات الردود المطور -->
+    {% if user_messages %}
+    <div class="chat-container" style="background: #EAE3D2; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #D49B23; max-height: 450px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+        
+        {% for msg in user_messages %}
+            {% if msg.pk in my_message_ids %}
+                <!-- رسالتي أنا: تظهر في جهة اليمين وبلون مميز ولها أزرار تحكم -->
+                <div class="chat-bubble my-message" style="align-self: flex-start; background: #fff; border-left: 5px solid #D49B23; padding: 12px 15px; border-radius: 8px; max-width: 75%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: right;">
+                    <p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><strong>أنت ({{ msg.name }}):</strong></p>
+                    <p style="margin: 0 0 8px 0; font-weight: 500; color: #222;">{{ msg.message }}</p>
+                    <div style="display: flex; gap: 10px; border-top: 1px solid #f2f2f2; padding-top: 5px;">
+                        <a href="{% url 'delete_message' msg.pk %}" style="color: #dc3545; text-decoration: none; font-size: 12px; font-weight: bold;">❌ حذف</a>
+                        <button onclick="fillFormToEdit('{{ msg.pk }}', '{{ msg.name }}', '{{ msg.email }}', '{{ msg.subject }}', '{{ msg.message|escapejs }}')" style="background: none; border: none; color: #D49B23; font-weight: bold; cursor: pointer; font-size: 12px; padding: 0;">📝 تعديل</button>
+                    </div>
+                </div>
+            {% else %}
+                <!-- رسالة الطرف الآخر: تظهر في جهة اليسار بلون مختلف وبدون أزرار -->
+                <div class="chat-bubble other-message" style="align-self: flex-end; background: #fdfaf2; border-right: 5px solid #666; padding: 12px 15px; border-radius: 8px; max-width: 75%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: right;">
+                    <p style="margin: 0 0 5px 0; font-size: 13px; color: #D49B23;"><strong>{{ msg.name }}:</strong> <span style="color: #999; font-size: 11px;">موضوع: {{ msg.subject }}</span></p>
+                    <p style="margin: 0; color: #444;">{{ msg.message }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+    </div>
+    {% endif %}
+
+    <!-- نموذج الإرسال والتعديل -->
+    <form method="POST" class="contact-form" id="main-contact-form">
+        {% csrf_token %}
+        <input type="hidden" name="message_id" id="form_message_id">
+        
+        <div class="form-group">
+            <input type="text" name="name" id="form_name" required placeholder="اكتب اسمك المستعار هنا" style="margin-bottom:15px; width:100%; padding:10px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div class="form-group">
+            <input type="email" name="email" id="form_email" required placeholder="بريدك الإلكتروني (سري)" style="margin-bottom:15px; width:100%; padding:10px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div class="form-group">
+            <input type="text" name="subject" id="form_subject" required placeholder="عنوان الرسالة" style="margin-bottom:15px; width:100%; padding:10px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div class="form-group">
+            <textarea name="message" id="form_message" rows="3" required placeholder="اكتب رسالتك أو ردك هنا واضغط إرسال..." style="width:100%; padding:10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
+        </div>
+        <button type="submit" id="submit-btn" class="btn btn-primary" style="margin-top:15px; width: 100%;">إرسال الرد 🚀</button>
+    </form>
+</section>
+
+<!-- جافا سكربت للتعديل الذكي -->
+<script>
+function fillFormToEdit(id, name, email, subject, message) {
+    document.getElementById('form_message_id').value = id;
+    document.getElementById('form_name').value = name;
+    document.getElementById('form_email').value = email;
+    document.getElementById('form_subject').value = subject;
+    document.getElementById('form_message').value = message;
+    
+    document.getElementById('submit-btn').innerText = "تحديث رسالتي المحددة ✨";
+    document.getElementById('main-contact-form').scrollIntoView({ behavior: 'smooth' });
+}
+const chatBox = document.querySelector('.chat-container');
+if (chatBox) { chatBox.scrollTop = chatBox.scrollHeight; }
+</script>
+
+{% endblock %}
